@@ -25,6 +25,8 @@ import org.apache.kafka.connect.data.SchemaBuilder;
 import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.data.Timestamp;
 import org.apache.kafka.connect.errors.DataException;
+import org.apache.kafka.connect.header.ConnectHeaders;
+import org.apache.kafka.connect.header.Headers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +37,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-class MessageConverter {
+class MessageConverter implements SourceMessageConverter {
   private static final Logger log = LoggerFactory.getLogger(MessageConverter.class);
   static final String FIELD_ENVELOPE_DELIVERYTAG = "deliveryTag";
   static final String FIELD_ENVELOPE_ISREDELIVER = "isRedeliver";
@@ -51,7 +53,6 @@ class MessageConverter {
       .field(FIELD_ENVELOPE_EXCHANGE, SchemaBuilder.string().optional().doc("The name of the exchange included in this parameter envelope. See `Envelope.getExchange() <https://www.rabbitmq.com/releases/rabbitmq-java-client/current-javadoc/com/rabbitmq/client/Envelope.html#getExchange-->`_"))
       .field(FIELD_ENVELOPE_ROUTINGKEY, SchemaBuilder.string().optional().doc("The routing key included in this parameter envelope. See `Envelope.getRoutingKey() <https://www.rabbitmq.com/releases/rabbitmq-java-client/current-javadoc/com/rabbitmq/client/Envelope.html#getRoutingKey-->`_").build())
       .build();
-
 
   static Struct envelope(Envelope envelope) {
     return new Struct(SCHEMA_ENVELOPE)
@@ -279,17 +280,40 @@ class MessageConverter {
       .field(FIELD_MESSAGE_BODY, SchemaBuilder.bytes().doc("The value body (opaque, client-specific byte array)").build())
       .build();
 
-  static Struct value(String consumerTag, Envelope envelope, AMQP.BasicProperties basicProperties, byte[] body) {
-    return new Struct(SCHEMA_VALUE)
+  MessageConverter(RabbitMQSourceConnectorConfig config) {
+  }
+
+
+
+  @Override
+  public Struct value(String consumerTag, Envelope envelope, AMQP.BasicProperties basicProperties, byte[] body) {
+    return new Struct(valueSchema())
         .put(FIELD_MESSAGE_CONSUMERTAG, consumerTag)
         .put(FIELD_MESSAGE_ENVELOPE, envelope(envelope))
         .put(FIELD_MESSAGE_BASICPROPERTIES, basicProperties(basicProperties))
         .put(FIELD_MESSAGE_BODY, body);
   }
 
-  static Struct key(AMQP.BasicProperties basicProperties) {
-    return new Struct(SCHEMA_KEY)
+  @Override
+  public Schema valueSchema() {
+    return SCHEMA_VALUE;
+  }
+
+  @Override
+  public Struct key(AMQP.BasicProperties basicProperties) {
+    return new Struct(keySchema())
         .put(FIELD_BASIC_PROPERTIES_MESSAGEID, basicProperties.getMessageId());
   }
+
+  @Override
+  public Schema keySchema() {
+    return SCHEMA_KEY;
+  }
+
+  @Override
+  public Headers headers(String consumerTag, Envelope envelope, AMQP.BasicProperties basicProperties, byte[] body) {
+    return new ConnectHeaders();
+  }
+
 
 }

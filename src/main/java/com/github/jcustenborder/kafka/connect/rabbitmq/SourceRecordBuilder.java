@@ -20,32 +20,44 @@ import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Envelope;
 import org.apache.kafka.common.utils.SystemTime;
 import org.apache.kafka.common.utils.Time;
-import org.apache.kafka.connect.data.Struct;
+import org.apache.kafka.connect.data.Schema;
+import org.apache.kafka.connect.header.Headers;
 import org.apache.kafka.connect.source.SourceRecord;
+
+import java.lang.reflect.InvocationTargetException;
 
 class SourceRecordBuilder {
   final RabbitMQSourceConnectorConfig config;
   Time time = new SystemTime();
+  final SourceMessageConverter messageConverter;
 
-  SourceRecordBuilder(RabbitMQSourceConnectorConfig config) {
+  SourceRecordBuilder(RabbitMQSourceConnectorConfig config) throws ClassNotFoundException, IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
     this.config = config;
+    String messageConverterClassName = config.messageConverter;
+    this.messageConverter = messageConverterClassName == null ?
+        new MessageConverter(config) :
+        (SourceMessageConverter) (Class.forName(messageConverterClassName).getConstructor(RabbitMQSourceConnectorConfig.class).newInstance(config));
   }
 
   SourceRecord sourceRecord(String consumerTag, Envelope envelope, AMQP.BasicProperties basicProperties, byte[] bytes) {
-    Struct key = MessageConverter.key(basicProperties);
-    Struct value = MessageConverter.value(consumerTag, envelope, basicProperties, bytes);
-    final String topic = this.config.kafkaTopic.execute(RabbitMQSourceConnectorConfig.KAFKA_TOPIC_TEMPLATE, value);
+    Object key = this.messageConverter.key(basicProperties);
+    Schema keySchema = this.messageConverter.keySchema();
+    Object value = this.messageConverter.value(consumerTag, envelope, basicProperties, bytes);
+    Schema valueSchema = this.messageConverter.valueSchema();
+    Headers headers = this.messageConverter.headers(consumerTag, envelope, basicProperties, bytes);
+    final String topic = RabbitMQSourceConnectorConfig.KAFKA_TOPIC_TEMPLATE; //this.config.kafkaTopic.execute(RabbitMQSourceConnectorConfig.KAFKA_TOPIC_TEMPLATE, value);
 
     return new SourceRecord(
         ImmutableMap.of("routingKey", envelope.getRoutingKey()),
         ImmutableMap.of("deliveryTag", envelope.getDeliveryTag()),
         topic,
         null,
-        key.schema(),
+        keySchema,
         key,
-        value.schema(),
+        valueSchema,
         value,
-        null == basicProperties.getTimestamp() ? this.time.milliseconds() : basicProperties.getTimestamp().getTime()
+        null == basicProperties.getTimestamp() ? this.time.milliseconds() : basicProperties.getTimestamp().getTime(),
+        headers
     );
   }
 }

@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 
 class ConnectConsumer implements Consumer {
   private static final Logger log = LoggerFactory.getLogger(ConnectConsumer.class);
@@ -32,7 +33,7 @@ class ConnectConsumer implements Consumer {
   final RabbitMQSourceConnectorConfig config;
   final SourceRecordBuilder sourceRecordBuilder;
 
-  ConnectConsumer(SourceRecordConcurrentLinkedDeque records, RabbitMQSourceConnectorConfig config) {
+  ConnectConsumer(SourceRecordConcurrentLinkedDeque records, RabbitMQSourceConnectorConfig config) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
     this.records = records;
     this.config = config;
     this.sourceRecordBuilder = new SourceRecordBuilder(this.config);

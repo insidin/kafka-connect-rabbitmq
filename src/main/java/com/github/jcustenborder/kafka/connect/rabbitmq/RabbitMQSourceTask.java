@@ -51,7 +51,11 @@ public class RabbitMQSourceTask extends SourceTask {
   public void start(Map<String, String> settings) {
     this.config = new RabbitMQSourceConnectorConfig(settings);
     this.records = new SourceRecordConcurrentLinkedDeque();
-    this.consumer = new ConnectConsumer(this.records, this.config);
+    try {
+      this.consumer = new ConnectConsumer(this.records, this.config);
+    } catch (Exception e) {
+      throw new ConnectException(e);
+    }
 
     ConnectionFactory connectionFactory = this.config.connectionFactory();
     try {

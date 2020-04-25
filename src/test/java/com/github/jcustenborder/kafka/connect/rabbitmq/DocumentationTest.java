@@ -17,15 +17,13 @@ package com.github.jcustenborder.kafka.connect.rabbitmq;
 
 import com.github.jcustenborder.kafka.connect.utils.BaseDocumentationTest;
 import org.apache.kafka.connect.data.Schema;
+import org.junit.jupiter.api.Disabled;
 
 import java.util.Arrays;
 import java.util.List;
 
+@Disabled
 public class DocumentationTest extends BaseDocumentationTest {
-  @Override
-  protected String[] packages() {
-    return new String[]{this.getClass().getPackage().getName()};
-  }
 
   @Override
   protected List<Schema> schemas() {

@@ -39,10 +39,15 @@ class RabbitMQSourceConnectorConfig extends RabbitMQConnectorConfig {
       "than each consumer. " +
       "See `Channel.basicQos(int, boolean) <https://www.rabbitmq.com/releases/rabbitmq-java-client/current-javadoc/com/rabbitmq/client/Channel.html#basicQos-int-boolean->`_";
 
+  public static final String MESSAGE_CONVERTER_CLASSNAME_CONF = "message.converter";
+  static final String MESSAGE_CONVERTER_CLASSNAME_DOC = "Converter to compose the Kafka message. Optional, defaults to " +
+      "com.github.jcustenborder.kafka.connect.rabbitmq.MessageConverter";
+
   public final StructTemplate kafkaTopic;
   public final List<String> queues;
   public final int prefetchCount;
   public final boolean prefetchGlobal;
+  public String messageConverter;
 
   public RabbitMQSourceConnectorConfig(Map<String, String> settings) {
     super(config(), settings);
@@ -53,6 +58,7 @@ class RabbitMQSourceConnectorConfig extends RabbitMQConnectorConfig {
     this.queues = this.getList(QUEUE_CONF);
     this.prefetchCount = this.getInt(PREFETCH_COUNT_CONF);
     this.prefetchGlobal = this.getBoolean(PREFETCH_GLOBAL_CONF);
+    this.messageConverter = this.getString(MESSAGE_CONVERTER_CLASSNAME_CONF);
   }
 
   public static ConfigDef config() {
@@ -60,6 +66,7 @@ class RabbitMQSourceConnectorConfig extends RabbitMQConnectorConfig {
         .define(TOPIC_CONF, ConfigDef.Type.STRING, ConfigDef.Importance.HIGH, TOPIC_DOC)
         .define(PREFETCH_COUNT_CONF, ConfigDef.Type.INT, 0, ConfigDef.Importance.MEDIUM, PREFETCH_COUNT_DOC)
         .define(PREFETCH_GLOBAL_CONF, ConfigDef.Type.BOOLEAN, false, ConfigDef.Importance.MEDIUM, PREFETCH_GLOBAL_DOC)
-        .define(QUEUE_CONF, ConfigDef.Type.LIST, ConfigDef.Importance.HIGH, QUEUE_DOC);
+        .define(QUEUE_CONF, ConfigDef.Type.LIST, ConfigDef.Importance.HIGH, QUEUE_DOC)
+        .define(MESSAGE_CONVERTER_CLASSNAME_CONF, ConfigDef.Type.STRING, ConfigDef.Importance.MEDIUM, MESSAGE_CONVERTER_CLASSNAME_DOC);
   }
 }
