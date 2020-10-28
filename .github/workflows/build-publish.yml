@@ -1,5 +1,9 @@
 name: Publish package to GitHub Packages
 on:
+  push:
+    branches:
+    - main
+    - pluggable-message-converter
   release:
     types: [created]
 jobs:
