@@ -10,7 +10,7 @@
     <version>0.1.0</version>
     <name>kafka-connect-rabbitmq</name>
     <description>A Kafka Connect connector reading and writing data from RabbitMQ.</description>
-    <url>https://github.com/jcustenborder/kafka-connect-rabbitmq</url>
+    <url>https://github.com/insidin/kafka-connect-rabbitmq</url>
     <inceptionYear>2017</inceptionYear>
     <licenses>
         <license>
@@ -28,15 +28,30 @@
                 <role>Committer</role>
             </roles>
         </developer>
+        <developer>
+            <id>insidn</id>
+            <name>Jan Uyttenhove</name>
+            <url>https://github.com/insidin</url>
+            <roles>
+                <role>Committer</role>
+            </roles>
+        </developer>
     </developers>
     <scm>
-        <connection>scm:git:https://github.com/jcustenborder/kafka-connect-rabbitmq.git</connection>
-        <developerConnection>scm:git:git@github.com:jcustenborder/kafka-connect-rabbitmq.git</developerConnection>
-        <url>https://github.com/jcustenborder/kafka-connect-rabbitmq</url>
+        <connection>scm:git:https://github.com/insidin/kafka-connect-rabbitmq.git</connection>
+        <developerConnection>scm:git:git@github.com:insidin/kafka-connect-rabbitmq.git</developerConnection>
+        <url>https://github.com/insidin/kafka-connect-rabbitmq</url>
     </scm>
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/insidin/kafka-connect-rabbitmq</url>
+        </repository>
+    </distributionManagement>
     <issueManagement>
         <system>github</system>
-        <url>https://github.com/jcustenborder/kafka-connect-rabbitmq/issues</url>
+        <url>https://github.com/insidin/kafka-connect-rabbitmq/issues</url>
     </issueManagement>
     <properties>
         <rabbitmq.version>5.7.1</rabbitmq.version>
