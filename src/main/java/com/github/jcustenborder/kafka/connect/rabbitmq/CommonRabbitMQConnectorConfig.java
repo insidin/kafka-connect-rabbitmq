@@ -21,7 +21,8 @@ import org.apache.kafka.common.config.ConfigDef;
 
 import java.util.Map;
 
-class RabbitMQConnectorConfig extends AbstractConfig {
+public abstract class CommonRabbitMQConnectorConfig extends AbstractConfig {
+
   public static final String USERNAME_CONFIG = "rabbitmq.username";
   public static final String PASSWORD_CONFIG = "rabbitmq.password";
   public static final String VIRTUAL_HOST_CONFIG = "rabbitmq.virtual.host";
@@ -74,8 +75,7 @@ class RabbitMQConnectorConfig extends AbstractConfig {
   public final int port;
   public final ConnectionFactory connectionFactory;
 
-
-  public RabbitMQConnectorConfig(ConfigDef definition, Map<?, ?> originals) {
+  public CommonRabbitMQConnectorConfig(ConfigDef definition, Map<?, ?> originals) {
     super(definition, originals);
     this.username = this.getString(USERNAME_CONFIG);
     this.password = this.getString(PASSWORD_CONFIG);
@@ -113,7 +113,7 @@ class RabbitMQConnectorConfig extends AbstractConfig {
         .define(PORT_CONFIG, ConfigDef.Type.INT, ConnectionFactory.DEFAULT_AMQP_PORT, ConfigDef.Importance.MEDIUM, PORT_DOC);
   }
 
-  final ConnectionFactory connectionFactory() {
+  public final ConnectionFactory connectionFactory() {
     ConnectionFactory connectionFactory = new ConnectionFactory();
     connectionFactory.setHost(this.host);
     connectionFactory.setUsername(this.username);
@@ -132,5 +132,4 @@ class RabbitMQConnectorConfig extends AbstractConfig {
 
     return connectionFactory;
   }
-
 }

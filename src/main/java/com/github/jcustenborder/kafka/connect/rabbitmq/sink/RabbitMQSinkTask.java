@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.jcustenborder.kafka.connect.rabbitmq;
+package com.github.jcustenborder.kafka.connect.rabbitmq.sink;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -34,7 +34,7 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 
 public class RabbitMQSinkTask extends SinkTask {
-  private static final Logger log = LoggerFactory.getLogger(RabbitMQSourceTask.class);
+  private static final Logger log = LoggerFactory.getLogger(RabbitMQSinkTask.class);
   RabbitMQSinkConnectorConfig config;
 
   Channel channel;

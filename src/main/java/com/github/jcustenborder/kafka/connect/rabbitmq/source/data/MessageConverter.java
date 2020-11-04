@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.jcustenborder.kafka.connect.rabbitmq;
+package com.github.jcustenborder.kafka.connect.rabbitmq.source.data;
 
 import com.google.common.collect.ImmutableMap;
 import com.rabbitmq.client.AMQP;
@@ -33,11 +33,11 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
-class MessageConverter implements SourceMessageConverter {
+public class MessageConverter implements SourceMessageConverter<Struct, Struct> {
   private static final Logger log = LoggerFactory.getLogger(MessageConverter.class);
   static final String FIELD_ENVELOPE_DELIVERYTAG = "deliveryTag";
   static final String FIELD_ENVELOPE_ISREDELIVER = "isRedeliver";
@@ -280,11 +280,6 @@ class MessageConverter implements SourceMessageConverter {
       .field(FIELD_MESSAGE_BODY, SchemaBuilder.bytes().doc("The value body (opaque, client-specific byte array)").build())
       .build();
 
-  MessageConverter(RabbitMQSourceConnectorConfig config) {
-  }
-
-
-
   @Override
   public Struct value(String consumerTag, Envelope envelope, AMQP.BasicProperties basicProperties, byte[] body) {
     return new Struct(valueSchema())
@@ -300,7 +295,7 @@ class MessageConverter implements SourceMessageConverter {
   }
 
   @Override
-  public Struct key(AMQP.BasicProperties basicProperties) {
+  public Struct key(String consumerTag, Envelope envelope, AMQP.BasicProperties basicProperties, byte[] body) {
     return new Struct(keySchema())
         .put(FIELD_BASIC_PROPERTIES_MESSAGEID, basicProperties.getMessageId());
   }
@@ -314,6 +309,4 @@ class MessageConverter implements SourceMessageConverter {
   public Headers headers(String consumerTag, Envelope envelope, AMQP.BasicProperties basicProperties, byte[] body) {
     return new ConnectHeaders();
   }
-
-
 }

@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.jcustenborder.kafka.connect.rabbitmq;
+package com.github.jcustenborder.kafka.connect.rabbitmq.source.data;
 
+import com.github.jcustenborder.kafka.connect.rabbitmq.source.RabbitMQSourceConnectorConfig;
 import com.google.common.collect.ImmutableMap;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Envelope;
@@ -26,26 +27,27 @@ import org.apache.kafka.connect.source.SourceRecord;
 
 import java.lang.reflect.InvocationTargetException;
 
-class SourceRecordBuilder {
-  final RabbitMQSourceConnectorConfig config;
-  Time time = new SystemTime();
-  final SourceMessageConverter messageConverter;
+public class SourceRecordBuilder {
 
-  SourceRecordBuilder(RabbitMQSourceConnectorConfig config) throws ClassNotFoundException, IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
+  private final Time time = new SystemTime();
+  private final SourceMessageConverter messageConverter;
+  private final RabbitMQSourceConnectorConfig config;
+
+  public SourceRecordBuilder(RabbitMQSourceConnectorConfig config) throws ClassNotFoundException, IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
     this.config = config;
     String messageConverterClassName = config.messageConverter;
     this.messageConverter = messageConverterClassName == null ?
-        new MessageConverter(config) :
-        (SourceMessageConverter) (Class.forName(messageConverterClassName).getConstructor(RabbitMQSourceConnectorConfig.class).newInstance(config));
+        new MessageConverter() :
+        (SourceMessageConverter) (Class.forName(messageConverterClassName).getConstructor().newInstance());
   }
 
-  SourceRecord sourceRecord(String consumerTag, Envelope envelope, AMQP.BasicProperties basicProperties, byte[] bytes) {
-    Object key = this.messageConverter.key(basicProperties);
+  public SourceRecord sourceRecord(String consumerTag, Envelope envelope, AMQP.BasicProperties basicProperties, byte[] bytes) {
+    Object key = this.messageConverter.key(consumerTag, envelope, basicProperties, bytes);
     Schema keySchema = this.messageConverter.keySchema();
     Object value = this.messageConverter.value(consumerTag, envelope, basicProperties, bytes);
     Schema valueSchema = this.messageConverter.valueSchema();
     Headers headers = this.messageConverter.headers(consumerTag, envelope, basicProperties, bytes);
-    final String topic = RabbitMQSourceConnectorConfig.KAFKA_TOPIC_TEMPLATE; //this.config.kafkaTopic.execute(RabbitMQSourceConnectorConfig.KAFKA_TOPIC_TEMPLATE, value);
+    String topic = this.config.kafkaTopic;
 
     return new SourceRecord(
         ImmutableMap.of("routingKey", envelope.getRoutingKey()),

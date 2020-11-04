@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-package com.github.jcustenborder.kafka.connect.rabbitmq;
+package com.github.jcustenborder.kafka.connect.rabbitmq.sink;
 
 import java.util.Map;
 
+import com.github.jcustenborder.kafka.connect.rabbitmq.CommonRabbitMQConnectorConfig;
 import org.apache.kafka.common.config.ConfigDef;
 
 import com.github.jcustenborder.kafka.connect.utils.template.StructTemplate;
 
-public class RabbitMQSinkConnectorConfig extends RabbitMQConnectorConfig {
+public class RabbitMQSinkConnectorConfig extends CommonRabbitMQConnectorConfig {
   static final String KAFKA_TOPIC_TEMPLATE = "kafkaTopicTemplate";
   public static final String TOPIC_CONF = "topics";
   static final String TOPIC_DOC = "Kafka topic to read the messages from.";
@@ -51,7 +52,7 @@ public class RabbitMQSinkConnectorConfig extends RabbitMQConnectorConfig {
   }
 
   public static ConfigDef config() {
-    return RabbitMQConnectorConfig.config()
+    return CommonRabbitMQConnectorConfig.config()
         .define(TOPIC_CONF, ConfigDef.Type.STRING, ConfigDef.Importance.HIGH, TOPIC_DOC)
         .define(EXCHANGE_CONF, ConfigDef.Type.STRING, ConfigDef.Importance.HIGH, EXCHANGE_DOC)
         .define(ROUTING_KEY_CONF, ConfigDef.Type.STRING, ConfigDef.Importance.HIGH, ROUTING_KEY_DOC);

@@ -13,20 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.jcustenborder.kafka.connect.rabbitmq;
+package com.github.jcustenborder.kafka.connect.rabbitmq.source.data;
 
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Envelope;
 import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.header.Headers;
 
-public interface SourceMessageConverter {
+public interface SourceMessageConverter<K, V> {
 
-  Object value(String consumerTag, Envelope envelope, AMQP.BasicProperties basicProperties, byte[] body);
+  V value(String consumerTag, Envelope envelope, AMQP.BasicProperties basicProperties, byte[] body);
 
   Schema valueSchema();
 
-  Object key(AMQP.BasicProperties basicProperties);
+  K key(String consumerTag, Envelope envelope, AMQP.BasicProperties basicProperties, byte[] body);
 
   Schema keySchema();
 
