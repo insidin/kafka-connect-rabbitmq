@@ -18,3 +18,5 @@ target
 .settings
 .okhttpcache
 .idea
+.vscode
+.github

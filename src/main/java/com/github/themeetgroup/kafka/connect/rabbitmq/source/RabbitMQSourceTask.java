@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.jcustenborder.kafka.connect.rabbitmq.source;
+package com.github.themeetgroup.kafka.connect.rabbitmq.source;
 
 import com.github.jcustenborder.kafka.connect.utils.VersionUtil;
 import com.github.jcustenborder.kafka.connect.utils.data.SourceRecordConcurrentLinkedDeque;
@@ -58,7 +58,7 @@ public class RabbitMQSourceTask extends SourceTask {
 
     ConnectionFactory connectionFactory = config.connectionFactory();
     try {
-      log.info("Opening connection to {}:{}/{}", config.host, config.port, config.virtualHost);
+      log.info("Opening connection to {}:{}/{} (SSL: {})", config.host, config.port, config.virtualHost, config.useSsl);
       this.connection = connectionFactory.newConnection();
     } catch (IOException | TimeoutException e) {
       throw new ConnectException(e);
@@ -67,6 +67,10 @@ public class RabbitMQSourceTask extends SourceTask {
     try {
       log.info("Creating Channel");
       this.channel = this.connection.createChannel();
+      log.info("Declaring queues");
+      for (String queue : config.queues) {
+        this.channel.queueDeclare(queue, true, false, false, null);
+      }
     } catch (IOException e) {
       throw new ConnectException(e);
     }

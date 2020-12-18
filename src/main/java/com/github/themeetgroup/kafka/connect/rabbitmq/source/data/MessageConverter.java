@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.jcustenborder.kafka.connect.rabbitmq.source.data;
+package com.github.themeetgroup.kafka.connect.rabbitmq.source.data;
 
 import com.google.common.collect.ImmutableMap;
 import com.rabbitmq.client.AMQP;
@@ -24,7 +24,6 @@ import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.SchemaBuilder;
 import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.data.Timestamp;
-import org.apache.kafka.connect.errors.DataException;
 import org.apache.kafka.connect.header.ConnectHeaders;
 import org.apache.kafka.connect.header.Headers;
 import org.slf4j.Logger;
@@ -45,7 +44,7 @@ public class MessageConverter implements SourceMessageConverter<Struct, Struct> 
   static final String FIELD_ENVELOPE_ROUTINGKEY = "routingKey";
 
   static final Schema SCHEMA_ENVELOPE = SchemaBuilder.struct()
-      .name("com.github.jcustenborder.kafka.connect.rabbitmq.Envelope")
+      .name("com.github.themeetgroup.kafka.connect.rabbitmq.Envelope")
       .doc("Encapsulates a group of parameters used for AMQP's Basic methods. See " +
           "`Envelope <https://www.rabbitmq.com/releases/rabbitmq-java-client/current-javadoc/com/rabbitmq/client/Envelope.html>`_")
       .field(FIELD_ENVELOPE_DELIVERYTAG, SchemaBuilder.int64().doc("The delivery tag included in this parameter envelope. See `Envelope.getDeliveryTag() <https://www.rabbitmq.com/releases/rabbitmq-java-client/current-javadoc/com/rabbitmq/client/Envelope.html#getDeliveryTag-->`_").build())
@@ -66,7 +65,7 @@ public class MessageConverter implements SourceMessageConverter<Struct, Struct> 
 
   static {
     SchemaBuilder builder = SchemaBuilder.struct()
-        .name("com.github.jcustenborder.kafka.connect.rabbitmq.BasicProperties.HeaderValue")
+        .name("com.github.themeetgroup.kafka.connect.rabbitmq.BasicProperties.HeaderValue")
         .doc("Used to store the value of a header value. The `type` field stores the type of the data and the corresponding " +
             "field to read the data from.")
         .field("type", SchemaBuilder.string().doc("Used to define the type for the HeaderValue. " +
@@ -106,7 +105,7 @@ public class MessageConverter implements SourceMessageConverter<Struct, Struct> 
   static final String FIELD_BASIC_PROPERTIES_APPID = "appId";
 
   static final Schema SCHEMA_KEY = SchemaBuilder.struct()
-      .name("com.github.jcustenborder.kafka.connect.rabbitmq.MessageKey")
+      .name("com.github.themeetgroup.kafka.connect.rabbitmq.MessageKey")
       .doc("Key used for partition assignment in Kafka.")
       .field(
           FIELD_BASIC_PROPERTIES_MESSAGEID,
@@ -116,7 +115,7 @@ public class MessageConverter implements SourceMessageConverter<Struct, Struct> 
       .build();
 
   static final Schema SCHEMA_BASIC_PROPERTIES = SchemaBuilder.struct()
-      .name("com.github.jcustenborder.kafka.connect.rabbitmq.BasicProperties")
+      .name("com.github.themeetgroup.kafka.connect.rabbitmq.BasicProperties")
       .optional()
       .doc("Corresponds to the `BasicProperties <https://www.rabbitmq.com/releases/rabbitmq-java-client/current-javadoc/com/rabbitmq/client/BasicProperties.html>`_")
       .field(
@@ -224,9 +223,10 @@ public class MessageConverter implements SourceMessageConverter<Struct, Struct> 
         }
 
         if (!FIELD_LOOKUP.containsKey(headerValue.getClass())) {
-          throw new DataException(
-              String.format("Could not determine the type for field '%s' type '%s'", kvp.getKey(), headerValue.getClass().getName())
+          log.warn(
+              String.format("Could not determine the type for field '%s' type '%s', skipping", kvp.getKey(), headerValue.getClass().getName())
           );
+          continue;
         } else {
           field = FIELD_LOOKUP.get(headerValue.getClass());
         }
@@ -272,7 +272,7 @@ public class MessageConverter implements SourceMessageConverter<Struct, Struct> 
 
 
   static final Schema SCHEMA_VALUE = SchemaBuilder.struct()
-      .name("com.github.jcustenborder.kafka.connect.rabbitmq.Message")
+      .name("com.github.themeetgroup.kafka.connect.rabbitmq.Message")
       .doc("Message as it is delivered to the `RabbitMQ Consumer <https://www.rabbitmq.com/releases/rabbitmq-java-client/current-javadoc/com/rabbitmq/client/Consumer.html#handleDelivery-java.lang.String-com.rabbitmq.client.Envelope-com.rabbitmq.client.AMQP.BasicProperties-byte:A->`_ ")
       .field(FIELD_MESSAGE_CONSUMERTAG, SchemaBuilder.string().doc("The consumer tag associated with the consumer").build())
       .field(FIELD_MESSAGE_ENVELOPE, SCHEMA_ENVELOPE)
